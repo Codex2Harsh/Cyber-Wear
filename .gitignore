@@ -1,0 +1,14 @@
+# Secret keys file
+config.js
+
+# macOS system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
+
+# VS Code editor settings folder
+.vscode/
+
+# Log files
+*.log
