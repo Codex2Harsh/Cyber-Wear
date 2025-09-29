@@ -6,18 +6,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectAllBtn = document.getElementById('select-all-btn');
     const deselectAllBtn = document.getElementById('deselect-all-btn');
     const emptyCartBtn = document.getElementById('empty-cart-btn');
-    const checkoutBtn = document.getElementById('checkout-btn'); 
-
+    const checkoutBtn = document.getElementById('checkout-btn');
 
     const TAX_RATE = 0.18;
 
     function renderCart() {
         const cart = getCart();
         if (cart.length === 0) {
-            cartItemsContainer.innerHTML = '<div class="empty-cart-message">YOUR CART IS EMPTY // <a href="index.html">START SHOPPING</a></div>';
-            deselectAllBtn.style.display = 'none';
-            selectAllBtn.style.display = 'none';
-            emptyCartBtn.style.display = 'none';
+            cartItemsContainer.innerHTML = '<div class="empty-cart-message">YOUR CART IS CURRENTLY EMPTY // <a href="index.html">START SHOPPING</a></div>';
+            if(deselectAllBtn) deselectAllBtn.style.display = 'none';
+            if(selectAllBtn) selectAllBtn.style.display = 'none';
+            if(emptyCartBtn) emptyCartBtn.style.display = 'none';
         } else {
             cartItemsContainer.innerHTML = cart.map(item => {
                 const formattedPrice = formatToIndianRupees(item.price);
@@ -41,9 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             }).join('');
-            deselectAllBtn.style.display = 'inline-block';
-            selectAllBtn.style.display = 'inline-block';
-            emptyCartBtn.style.display = 'inline-block';
+            if(deselectAllBtn) deselectAllBtn.style.display = 'inline-block';
+            if(selectAllBtn) selectAllBtn.style.display = 'inline-block';
+            if(emptyCartBtn) emptyCartBtn.style.display = 'inline-block';
         }
         updateSummary();
     }
@@ -72,55 +71,94 @@ document.addEventListener('DOMContentLoaded', () => {
         summaryTotal.textContent = `₹${formatter.format(totalINR)}`;
     }
 
-    // --- THIS IS THE NEW LOGIC FOR THE CHECKOUT BUTTON ---
-    checkoutBtn.addEventListener('click', () => {
-        const selectedItems = [];
-        document.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
-            const itemElement = checkbox.closest('.cart-item');
-            selectedItems.push(itemElement.dataset.productId);
-        });
+    // --- THIS IS THE CORRECTED LOGIC ---
 
-        if (selectedItems.length === 0) {
-            alert("Please select at least one item to check out.");
-            return;
-        }
-
-        // Save the selected items to sessionStorage to be used on the checkout page
-        sessionStorage.setItem('itemsToCheckout', JSON.stringify(selectedItems));
-
-        // Go to the checkout page
-        window.location.href = 'checkout.html';
-    });
-    selectAllBtn.addEventListener('click', () => {
-        document.querySelectorAll('.item-checkbox').forEach(checkbox => {
-            checkbox.checked = true;
-        });
-        updateSummary();
-    });
-
-    deselectAllBtn.addEventListener('click', () => {
-        document.querySelectorAll('.item-checkbox').forEach(checkbox => {
-            checkbox.checked = false;
-        });
-        updateSummary();
-    });
-
-    emptyCartBtn.addEventListener('click', () => {
-        if (confirm('Sure to empty your cart? Think Again!')) {
-            localStorage.removeItem('cyberWearCart');
+    // This function updates the quantity of an item in the cart
+    function updateQuantity(productId, newQuantity) {
+        let cart = getCart();
+        const item = cart.find(p => p.id === productId);
+        if (item && newQuantity > 0) {
+            item.quantity = newQuantity;
+            saveCart(cart);
             renderCart();
-            updateCartIcon();
+        }
+    }
+
+    // This function removes an item from the cart
+    function removeItem(productId) {
+        let cart = getCart().filter(p => p.id !== productId);
+        saveCart(cart);
+        renderCart(); // Re-render the cart to show the item has been removed
+        updateCartIcon(); // Update the header icon
+    }
+
+    // A single event listener for all actions within the cart items container
+    cartItemsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-btn')) {
+            const itemElement = e.target.closest('.cart-item');
+            removeItem(itemElement.dataset.productId);
         }
     });
 
     cartItemsContainer.addEventListener('change', (e) => {
-        if (e.target.classList.contains('item-checkbox') || e.target.classList.contains('quantity-input')) {
+        if (e.target.classList.contains('quantity-input')) {
+            const itemElement = e.target.closest('.cart-item');
+            const newQuantity = parseInt(e.target.value, 10);
+            updateQuantity(itemElement.dataset.productId, newQuantity);
+        }
+        if (e.target.classList.contains('item-checkbox')) {
             updateSummary();
         }
     });
 
-    
+    // --- END OF CORRECTED LOGIC ---
 
+    if(checkoutBtn) {
+        checkoutBtn.addEventListener('click', () => {
+            const selectedItems = [];
+            document.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
+                const itemElement = checkbox.closest('.cart-item');
+                selectedItems.push(itemElement.dataset.productId);
+            });
+
+            if (selectedItems.length === 0) {
+                alert("Please select at least one item to check out.");
+                return;
+            }
+            sessionStorage.setItem('itemsToCheckout', JSON.stringify(selectedItems));
+            window.location.href = 'checkout.html';
+        });
+    }
+
+    if(selectAllBtn) {
+        selectAllBtn.addEventListener('click', () => {
+            document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            updateSummary();
+        });
+    }
+
+    if(deselectAllBtn) {
+        deselectAllBtn.addEventListener('click', () => {
+            document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateSummary();
+        });
+    }
+    
+    if(emptyCartBtn) {
+        emptyCartBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to empty your cart? This action cannot be undone.')) {
+                localStorage.removeItem('cyberWearCart');
+                renderCart();
+                updateCartIcon();
+            }
+        });
+    }
+
+    // Initial Load
     renderCart();
     updateCartIcon();
 });
