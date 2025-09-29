@@ -71,9 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         summaryTotal.textContent = `₹${formatter.format(totalINR)}`;
     }
 
-    // --- THIS IS THE CORRECTED LOGIC ---
-
-    // This function updates the quantity of an item in the cart
+    // Updates the quantity of an item in the cart
     function updateQuantity(productId, newQuantity) {
         let cart = getCart();
         const item = cart.find(p => p.id === productId);
@@ -84,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // This function removes an item from the cart
+    // Removes an item from the cart
     function removeItem(productId) {
         let cart = getCart().filter(p => p.id !== productId);
         saveCart(cart);
@@ -92,7 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCartIcon(); // Update the header icon
     }
 
-    // A single event listener for all actions within the cart items container
     cartItemsContainer.addEventListener('click', (e) => {
         if (e.target.classList.contains('remove-btn')) {
             const itemElement = e.target.closest('.cart-item');
@@ -111,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- END OF CORRECTED LOGIC ---
 
     if(checkoutBtn) {
         checkoutBtn.addEventListener('click', () => {
@@ -158,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initial Load
     renderCart();
     updateCartIcon();
 });
