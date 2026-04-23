@@ -2,7 +2,7 @@
 
 Welcome to CYBER-WEAR, a fully-featured, front-end e-commerce website built from the ground up with a sleek, futuristic cyberpunk aesthetic. This project showcases a complete, interactive user journey from browsing products to a simulated checkout process, all built with vanilla HTML, CSS, and JavaScript.
 
-**Live Demo:** [Link to deployed website]
+**Live Demo:** https://codex2harsh.github.io/Cyber-Wear/
 
 ---
 ## 📜 Project Description
